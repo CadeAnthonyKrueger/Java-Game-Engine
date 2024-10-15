@@ -76,15 +76,12 @@ public class GridSpace<T> extends GameObject implements FactoryObject, AdjacentR
 
     public <R> ArrayList<R> GetAdjacentSpaces(boolean diagonal)
     {
-        return adjacentGridSpaces.GetAdjacentSpaces((R space) ->
-                        ((GridSpace<EntityObject>) space).IsEmpty(),
-                        diagonal,
-                        AdjacentReturnTypes.SPACES);
+        return adjacentGridSpaces.GetAdjacentSpaces(GridSpace::IsEmpty, diagonal, AdjacentReturnTypes.SPACES);
     }
 
     public <R> ArrayList<R> GetAdjacentSpaces
     (
-        Predicate<R> condition,
+        Predicate<GridSpace<EntityObject>> condition,
         boolean diagonal,
         AdjacentReturnTypes type
     ) {

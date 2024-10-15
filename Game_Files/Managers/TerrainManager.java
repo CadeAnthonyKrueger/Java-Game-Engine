@@ -1,17 +1,20 @@
 package Game_Files.Managers;
 
 import Game_Files.Enums.AdjacentReturnTypes;
+import Game_Files.Enums.GridSpaceDirections;
 import Game_Files.Enums.TerrainTypes;
 import Game_Files.Factories.TerrainFactory;
 import Game_Files.GameObjects.EntityObjects.EntityObject;
 import Game_Files.GameObjects.GridSpace;
 import Game_Files.GameObjects.TerrainObjects.TerrainObject;
 import Game_Files.Helpers.Coordinate;
+import Game_Files.Helpers.EdgeTypeMap;
 import Game_Files.Helpers.Pair;
 
 import java.util.ArrayList;
 import java.util.Random;
 
+import static Game_Files.Enums.GridSpaceDirections.UP_LEFT;
 import static Game_Files.Enums.TerrainTypes.*;
 
 public class TerrainManager {
@@ -58,7 +61,7 @@ public class TerrainManager {
                     startingCol = ForceInBounds(startingCol, 0, gridSize - fillValue);
                 }
             }
-            System.out.println("Fill Value: " + fillValue + " Starting Col: " + startingCol);
+            //System.out.println("Fill Value: " + fillValue + " Starting Col: " + startingCol);
             for (int j = 0; j < fillValue; j++) {
                 GridSpace<EntityObject> gridSpace = GridManager.GetGridSpace(new Coordinate<>(currentRow, startingCol));
                 if (j == 0) {
@@ -96,46 +99,13 @@ public class TerrainManager {
     }
 
     private void CreateRiverBank() {
-        //System.out.println(landEdges);
+        EdgeTypeMap edgeMap = new EdgeTypeMap();
         for (GridSpace<EntityObject> edge : landEdges) {
-            ArrayList<GridSpace<EntityObject>> adjSpaces = edge.GetAdjacentSpaces(space ->
-                    space.Contains(WATER), true, AdjacentReturnTypes.SPACES);
-            //System.out.println(adjSpaces);
-            int rowDist = 0;
-            int colDist = 0;
-            for (GridSpace<EntityObject> waterEdge : adjSpaces) {
-                Coordinate<Integer> landEdgeCoord = edge.GetGridCoords();
-                Coordinate<Integer> waterEdgeCoord = waterEdge.GetGridCoords();
-                rowDist += landEdgeCoord.GetRow() - waterEdgeCoord.GetRow();
-                colDist += landEdgeCoord.GetCol() - waterEdgeCoord.GetCol();
-            }
-            System.out.println("Land: " + edge + " rowDist: " + rowDist + " colDist: " + colDist);
-            if (Math.abs(rowDist) + Math.abs(colDist) == 4) {
-                if (rowDist > 0 && colDist < 0) {
-                    PlaceTerrain(EDGE, EdgeTypes.TOP_RIGHT_INDENT, edge);
-                } else if (rowDist < 0 && colDist < 0) {
-                    PlaceTerrain(EDGE, EdgeTypes.BOTTOM_RIGHT_INDENT, edge);
-                } else if (rowDist > 0 && colDist > 0) {
-                    PlaceTerrain(EDGE, EdgeTypes.TOP_LEFT_INDENT, edge);
-                } else if (rowDist < 0 && colDist > 0) {
-                    PlaceTerrain(EDGE, EdgeTypes.BOTTOM_LEFT_INDENT, edge);
-                }
-            } else if (rowDist == 1 && colDist == -1) {
-                PlaceTerrain(EDGE, EdgeTypes.BOTTOM_LEFT, edge);
-            } else if (rowDist == 1 && colDist == 1) {
-                PlaceTerrain(EDGE, EdgeTypes.BOTTOM_RIGHT, edge);
-            } else if (rowDist == -1 && colDist == -1) {
-                PlaceTerrain(EDGE, EdgeTypes.TOP_LEFT, edge);
-            } else if (rowDist == -1 && colDist == 1) {
-                PlaceTerrain(EDGE, EdgeTypes.TOP_RIGHT, edge);
-            } else if (colDist < rowDist) {
-                PlaceTerrain(EDGE, EdgeTypes.LEFT, edge);
-            }  else if (colDist > rowDist) {
-                PlaceTerrain(EDGE, EdgeTypes.RIGHT, edge);
-            } else if (rowDist < colDist) {
-                PlaceTerrain(EDGE, EdgeTypes.TOP, edge);
-            }  else if (rowDist > colDist) {
-                PlaceTerrain(EDGE, EdgeTypes.BOTTOM, edge);
+            ArrayList<GridSpaceDirections> adjSpaces = edge.GetAdjacentSpaces(space ->
+                    space.Contains(WATER), true, AdjacentReturnTypes.DIRECTIONS);
+            TerrainTypes.EdgeTypes edgeType = edgeMap.GetEdge(adjSpaces);
+            if (edgeType != null) {
+                PlaceTerrain(EDGE, edgeMap.GetEdge(adjSpaces), edge);
             }
         }
     }

@@ -38,13 +38,13 @@ public class AdjacentGridSpaces {
     @SuppressWarnings("unchecked")
     public <T> ArrayList<T> GetAdjacentSpaces
     (
-            Predicate<T> condition,
+            Predicate<GridSpace<EntityObject>> condition,
             boolean diagonal,
             AdjacentReturnTypes type
     ) {
         ArrayList<T> availableSpaces = new ArrayList<>();
         for (Pair<GridSpace<EntityObject>, GridSpaceDirections> space : adjacentSpaces) {
-            if (space != null && condition.test((T) space.T1())) {
+            if (space != null && condition.test(space.T1())) {
                 boolean cond1 = !diagonal && space.T2() != UP_LEFT && space.T2() != UP_RIGHT;
                 boolean cond2 = space.T2() != DOWN_LEFT && space.T2() != DOWN_RIGHT;
                 if (!(cond1 && cond2)) {
@@ -56,7 +56,6 @@ public class AdjacentGridSpaces {
                 }
             }
         }
-        System.out.println(availableSpaces);
         return availableSpaces;
     }
 
